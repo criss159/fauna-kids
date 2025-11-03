@@ -1,0 +1,124 @@
+/* Login.css: estilos para la página de Login */
+
+body, .login-container {
+  font-family: 'Fredoka', sans-serif;
+}
+
+.bg-gradient-to-br {
+  background: linear-gradient(135deg, #fdf6ff 0%, #e3f0ff 100%);
+}
+
+.login-container {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.3s;
+}
+
+.login-container:hover {
+  box-shadow: 0 15px 35px rgba(168, 85, 247, 0.15);
+}
+
+input[type="text"], input[type="password"] {
+  font-size: 1rem;
+}
+
+/* Mejora de legibilidad en el login: texto y placeholder con mayor contraste */
+.login-page input[type="text"],
+.login-page input[type="password"] {
+  color: #0f172a; /* slate-900 */
+  background-color: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(2, 6, 23, 0.14); /* slate-950/14 */
+}
+.login-page input[type="text"]::placeholder,
+.login-page input[type="password"]::placeholder {
+  color: #94a3b8; /* slate-400 */
+  opacity: 1; /* asegurar que se aplique el color */
+}
+.login-page input[type="text"]:focus,
+.login-page input[type="password"]:focus {
+  border-color: #a78bfa; /* violet-400 */
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.25);
+}
+
+button {
+  cursor: pointer;
+}
+
+/* Forzar estilo para el botón de invitado en Login (evita estilos globales que lo dejen en blanco) */
+.guest-btn {
+  background-color: #6b21a8 !important; /* morado */
+  color: #fff !important;
+  border: 1px solid rgba(0,0,0,0.05) !important;
+  opacity: 1 !important;
+}
+.guest-btn:hover { background-color: #581c87 !important; }
+
+/* Estilos amigables para niños */
+.guest-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px !important;
+  font-size: 1.05rem !important;
+  border-radius: 999px !important;
+  background: linear-gradient(90deg, #ff9a9e 0%, #fad0c4 50%, #fbc2eb 100%) !important;
+  color: #2b2b2b !important;
+  box-shadow: 0 8px 18px rgba(250, 182, 255, 0.25);
+  transform: translateY(0);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+.guest-btn:hover { transform: translateY(-4px); box-shadow: 0 14px 28px rgba(250, 182, 255, 0.32); }
+.guest-btn .guest-icon { font-size: 1.4rem; display:inline-block; }
+.guest-btn .guest-label { font-weight: 700; }
+.guest-btn .guest-sub { display:block; font-size:0.7rem; opacity:0.8; margin-left:4px; }
+
+/* Estado deshabilitado: atenuado y no interactivo */
+.guest-btn[disabled], .guest-btn[aria-disabled="true"] {
+  opacity: 0.55 !important;
+  transform: none !important;
+  box-shadow: none !important;
+  pointer-events: none !important;
+}
+
+/* Estilo para input con error */
+.input-error {
+  border-color: #ff4d4f !important;
+  box-shadow: 0 0 0 4px rgba(255, 77, 79, 0.08) !important;
+}
+
+.login-page {
+  /* ahora el fondo está en body */
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-animation { animation: float 3s ease-in-out infinite; }
+
+@keyframes float { 0% { transform: translateY(0); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0); } }
+
+.bg-glass { background-color: rgba(255,255,255,0.85); backdrop-filter: blur(10px); }
+
+/* Contenedor principal: ancho responsivo y centrado */
+.login-page .bg-glass {
+  padding: 0;
+  width: min(1100px, 92vw); /* ocupa la mayoría del ancho en pantallas pequeñas y no demasiado en grandes */
+  max-width: 1200px;
+  margin: 0 auto; /* centrado */
+  display: flex;
+  overflow: hidden;
+}
+
+/* Ajustes para pantallas muy grandes: que ocupe más espacio */
+@media (min-width: 1600px) {
+  .login-page .bg-glass { width: 80vw; }
+}
+
+/* En pantallas pequeñas apilar verticalmente y asegurar padding interior */
+@media (max-width: 767px) {
+  .login-page { padding: 24px; }
+  .login-page .bg-glass { width: 100%; border-radius: 18px; flex-direction: column; }
+  .login-page .bg-glass .md\:w-1\/2 { width: 100%; }
+  .login-page .bg-glass form { padding: 20px; }
+}

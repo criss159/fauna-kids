@@ -1,0 +1,101 @@
+# 🐆 Fauna Kids - .gitignore
+
+# ===================================
+# Python / Django
+# ===================================
+*.py[cod]
+*$py.class
+__pycache__/
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.Python
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+*.pot
+media/
+staticfiles/
+
+# ===================================
+# Node.js / React
+# ===================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Build outputs
+dist/
+dist-ssr/
+*.local
+
+# Editor directories
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.swp
+*.swo
+*~
+
+# ===================================
+# Archivos Sensibles
+# ===================================
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+credentials.json
+serviceAccountKey.json
+
+# ===================================
+# Testing
+# ===================================
+coverage/
+*.cover
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.tox/
+
+# ===================================
+# OS
+# ===================================
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# ===================================
+# Temporales
+# ===================================
+*.tmp
+*.temp
+*.bak
+*.backup
+*~
+.~lock.*
+
+# ===================================
+# Logs
+# ===================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
