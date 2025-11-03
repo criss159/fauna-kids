@@ -1,6 +1,6 @@
-# 🐆 Fauna Kids
+# 🐆 Fauna Kids - Plataforma Web Educativa
 
-**Aplicación educativa interactiva para que los niños exploren y aprendan sobre animales mediante conversaciones con Jaggy, un jaguar amigable asistido por IA.**
+**Sistema web educativo interactivo para que los niños exploren y aprendan sobre animales mediante conversaciones con Jaggy, un jaguar amigable asistido por IA.**
 
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)
 [![Django](https://img.shields.io/badge/Django-5.1-green.svg)](https://www.djangoproject.com/)
