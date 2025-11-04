@@ -7,7 +7,7 @@ import {
     saveChat, 
     deleteChat as deleteChatAPI, 
     isGuestUser
-} from '../services';
+} from '../services/explorerChat.service';
 import DashboardLayout from '../components/layout/DashboardLayout.jsx'
 import avatarImg from '../assets/avatars/dino.png'
 
