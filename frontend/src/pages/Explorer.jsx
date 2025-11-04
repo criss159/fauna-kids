@@ -12,6 +12,9 @@ import DashboardLayout from '../components/layout/DashboardLayout.jsx'
 import avatarImg from '../assets/avatars/dino.png'
 
 export default function Explorer(){
+    // Estado de carga inicial para evitar errores de hidratación
+    const [isReady, setIsReady] = useState(false);
+    
     // Detectar si es usuario invitado - calcular directamente cada vez
     const isGuest = isGuestUser();
     
@@ -85,7 +88,12 @@ export default function Explorer(){
     useEffect(()=>{
         if(typeof window !== 'undefined'){
             const n = localStorage.getItem('fauna_nick');
-            if(!n) window.location.href = '/login';
+            if(!n) {
+                window.location.href = '/login';
+            } else {
+                // Marcar como listo después de verificar autenticación
+                setTimeout(() => setIsReady(true), 100);
+            }
         }
     }, [])
 
@@ -585,6 +593,20 @@ export default function Explorer(){
         }finally{
             setIsThinking(false)
         }
+    }
+
+    // Mostrar loading mientras se inicializa
+    if (!isReady) {
+        return (
+            <DashboardLayout>
+                <div className="flex items-center justify-center h-screen">
+                    <div className="text-center">
+                        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+                        <p className="mt-4 text-slate-600">Cargando...</p>
+                    </div>
+                </div>
+            </DashboardLayout>
+        );
     }
 
     return (
