@@ -20,6 +20,18 @@ export default defineConfig(({ mode }) => {
   }
   return {
     plugins: [react(), tailwindcss()],
+    build: {
+      // Configuración para evitar problemas de chunking en producción
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'vendor': ['react', 'react-dom', 'react-router-dom'],
+          }
+        }
+      },
+      // Aumentar el límite de advertencia de tamaño de chunk
+      chunkSizeWarningLimit: 1000,
+    },
     server: {
       proxy: {
         // Redirigir llamadas a /api durante desarrollo al backend Django

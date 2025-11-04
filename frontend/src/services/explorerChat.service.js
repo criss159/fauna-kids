@@ -2,7 +2,7 @@
  * Servicio para el manejo de chats del Explorer con persistencia en BD
  */
 
-import api from '../utils/api';
+import { api } from '../utils/api';
 
 /**
  * Lista todos los chats del usuario
