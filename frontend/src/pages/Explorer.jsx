@@ -158,17 +158,15 @@ export default function Explorer(){
         }
     }, [])
 
-    // Guardar conversación actual cada vez que cambien los mensajes
-    // Usar debounce para evitar guardados múltiples mientras se generan respuestas
-    useEffect(() => {
-        // Debounce: esperar 2 segundos después del último cambio en messages
-        const timeoutId = setTimeout(async () => {
-            await saveChatData();
-        }, 2000);
-        
-        // Limpiar timeout si messages cambia de nuevo antes de 2 segundos
-        return () => clearTimeout(timeoutId);
-    }, [messages, isGuest, currentChatId, saveChatData]);
+    // Función para generar título del chat basado en el primer mensaje
+    const generateChatTitle = useCallback((msgs) => {
+        const firstUserMsg = msgs.find(m => m.role === 'user')
+        if (firstUserMsg) {
+            const text = firstUserMsg.text.trim()
+            return text.length > 40 ? text.substring(0, 40) + '...' : text
+        }
+        return 'Nueva conversación'
+    }, [])
 
     const saveChatData = useCallback(async () => {
         // Evitar guardados duplicados simultáneos
@@ -265,15 +263,17 @@ export default function Explorer(){
         }
     }, [messages, isGuest, currentChatId, generateChatTitle, setChatList, setCurrentChatId]);
 
-    // Función para generar título del chat basado en el primer mensaje
-    const generateChatTitle = useCallback((msgs) => {
-        const firstUserMsg = msgs.find(m => m.role === 'user')
-        if (firstUserMsg) {
-            const text = firstUserMsg.text.trim()
-            return text.length > 40 ? text.substring(0, 40) + '...' : text
-        }
-        return 'Nueva conversación'
-    }, []);
+    // Guardar conversación actual cada vez que cambien los mensajes
+    // Usar debounce para evitar guardados múltiples mientras se generan respuestas
+    useEffect(() => {
+        // Debounce: esperar 2 segundos después del último cambio en messages
+        const timeoutId = setTimeout(async () => {
+            await saveChatData();
+        }, 2000);
+        
+        // Limpiar timeout si messages cambia de nuevo antes de 2 segundos
+        return () => clearTimeout(timeoutId);
+    }, [messages, isGuest, currentChatId, saveChatData]);
 
     useEffect(()=>{
         if(listRef.current){
