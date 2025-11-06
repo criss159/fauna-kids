@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import '../styles/Login.css';
 import PublicLayout from '../components/layout/PublicLayout.jsx';
+import JaggyAvatar from '../components/JaggyAvatar';
+import FloatingParticles from '../components/layout/FloatingParticles';
 import { loginWithGoogle, createGuestSession } from '../services/auth.service';
 
 /*
@@ -104,18 +106,39 @@ function LoginContent() {
 
   return (
     <PublicLayout>
-    <div className="min-h-screen flex items-center justify-center px-4 login-page">
-      <div className="bg-glass shadow-2xl rounded-3xl max-w-5xl w-full flex flex-col md:flex-row overflow-hidden">
-        <div className="md:w-1/2 flex items-center justify-center p-6 bg-gradient-to-b from-purple-200 via-pink-100 to-yellow-100">
-          <img src="https://cdn-icons-png.flaticon.com/512/1998/1998671.png" alt="Avatar básico" className="w-44 md:w-56 avatar-animation rounded-full shadow-lg" />
-        </div>
+      <FloatingParticles />
+      
+      {/* Botón Volver */}
+      <button
+        onClick={() => navigate('/')}
+        className="fixed top-4 left-4 z-30 flex items-center gap-2 px-4 py-2 rounded-lg backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+        style={{ 
+          background: 'var(--bg-surface)',
+          color: 'var(--text-color)',
+          border: '1px solid var(--border-color)'
+        }}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+        </svg>
+        <span className="font-medium">Volver</span>
+      </button>
 
-        <form onSubmit={submit} className="md:w-1/2 p-8 space-y-6">
-          <h2 className="text-3xl font-bold text-purple-700 text-center">¡Bienvenido a Fauna Kids!</h2>
-          <p className="text-gray-600 text-center">Explora la naturaleza con tu nuevo amigo</p>
+      <div className="min-h-screen flex items-center justify-center px-4 login-page" style={{ position: 'relative', zIndex: 10 }}>
+        <div className="shadow-2xl rounded-3xl max-w-5xl w-full flex flex-col md:flex-row overflow-hidden" style={{ background: 'var(--bg-surface)' }}>
+          <div className="md:w-1/2 flex items-center justify-center p-8 md:p-12 bg-gradient-to-br from-purple-400 via-pink-300 to-yellow-200">
+            <div className="flex flex-col items-center gap-4">
+              <JaggyAvatar emotion="happy" width={220} height={220} />
+              <p className="text-purple-900 font-bold text-2xl">¡Hola! Soy Jaggy</p>
+            </div>
+          </div>
+
+        <form onSubmit={submit} className="md:w-1/2 p-8 md:p-10 space-y-6">
+          <h2 className="text-3xl font-bold text-center" style={{ color: '#9333ea' }}>¡Bienvenido a Fauna Kids!</h2>
+          <p className="text-center" style={{ color: 'var(--text-color)', opacity: 0.7 }}>Explora la naturaleza con tu nuevo amigo</p>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Tu nombre o apodo</label>
+            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-color)' }}>Tu nombre o apodo</label>
             <input
               id="nickname"
               value={name}
@@ -124,12 +147,17 @@ function LoginContent() {
               placeholder="Ej. DinoFan, Sofi, Leo"
               aria-invalid={!!error}
               aria-describedby={error ? 'login-error' : undefined}
-              className={`mt-1 w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 ${error ? 'input-error' : ''}`}
+              className={`mt-1 w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 transition ${error ? 'input-error' : ''}`}
+              style={{
+                background: 'var(--bg-page)',
+                color: 'var(--text-color)',
+                border: `1px solid ${error ? '#ef4444' : 'var(--border-color)'}`
+              }}
             />
             {error && <p id="login-error" className="text-sm text-red-500 mt-2">{error}</p>}
           </div>
 
-          <div className="flex justify-center">
+          <div className="flex justify-center py-2">
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={handleGoogleError}
@@ -140,7 +168,7 @@ function LoginContent() {
             />
           </div>
 
-          <div className="text-center text-gray-500">— o —</div>
+          <div className="text-center" style={{ color: 'var(--text-color)', opacity: 0.5 }}>— o —</div>
           <div className="flex justify-center">
             <button 
               type="button" 
@@ -158,10 +186,10 @@ function LoginContent() {
           {/* Región accesible para errores/advertencias courteously announced */}
           <div aria-live="polite" className="sr-only" />
 
-          <p className="text-xs text-center text-gray-400 pt-4">Fauna Kids © 2025</p>
+          <p className="text-xs text-center pt-4" style={{ color: 'var(--text-color)', opacity: 0.4 }}>Fauna Kids © 2025</p>
         </form>
       </div>
-    </div>
+      </div>
     </PublicLayout>
   );
 }

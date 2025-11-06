@@ -4,8 +4,8 @@ import { PATHS } from '../../routes/paths';
 
 export default function MobileNav() {
   return (
-    <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 border-t backdrop-blur-lg shadow-2xl safe-bottom" 
-         style={{ background: 'rgba(255, 255, 255, 0.95)', borderColor: 'var(--border-color)' }}>
+    <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 border-t backdrop-blur-lg shadow-2xl safe-bottom" 
+         style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)' }}>
       <div className="flex items-center justify-around px-4 py-3">
         <NavLink
           to={PATHS.DASHBOARD}
@@ -20,15 +20,15 @@ export default function MobileNav() {
           {({ isActive }) => (
             <>
               <div className={`relative ${isActive ? 'scale-110' : ''} transition-transform`}>
-                <HomeIcon className={`w-7 h-7 mb-1 ${isActive ? '' : 'text-slate-600'}`} 
-                          style={isActive ? { color: 'var(--accent-start)' } : {}} />
+                <HomeIcon className={`w-7 h-7 mb-1`} 
+                          style={isActive ? { color: 'var(--accent-start)' } : { color: 'var(--text-color)', opacity: 0.6 }} />
                 {isActive && (
                   <div className="absolute -inset-2 rounded-full opacity-20" 
                        style={{ background: 'var(--accent-start)' }} />
                 )}
               </div>
-              <span className={`text-xs font-bold ${isActive ? '' : 'text-slate-600'}`}
-                    style={isActive ? { color: 'var(--accent-start)' } : {}}>
+              <span className={`text-xs font-bold`}
+                    style={isActive ? { color: 'var(--accent-start)' } : { color: 'var(--text-color)', opacity: 0.7 }}>
                 Inicio
               </span>
             </>
@@ -48,15 +48,15 @@ export default function MobileNav() {
           {({ isActive }) => (
             <>
               <div className={`relative ${isActive ? 'scale-110' : ''} transition-transform`}>
-                <SearchIcon className={`w-7 h-7 mb-1 ${isActive ? '' : 'text-slate-600'}`}
-                            style={isActive ? { color: 'var(--accent-start)' } : {}} />
+                <SearchIcon className={`w-7 h-7 mb-1`}
+                            style={isActive ? { color: 'var(--accent-start)' } : { color: 'var(--text-color)', opacity: 0.6 }} />
                 {isActive && (
                   <div className="absolute -inset-2 rounded-full opacity-20" 
                        style={{ background: 'var(--accent-start)' }} />
                 )}
               </div>
-              <span className={`text-xs font-bold ${isActive ? '' : 'text-slate-600'}`}
-                    style={isActive ? { color: 'var(--accent-start)' } : {}}>
+              <span className={`text-xs font-bold`}
+                    style={isActive ? { color: 'var(--accent-start)' } : { color: 'var(--text-color)', opacity: 0.7 }}>
                 Explorar
               </span>
             </>
@@ -76,15 +76,15 @@ export default function MobileNav() {
           {({ isActive }) => (
             <>
               <div className={`relative ${isActive ? 'scale-110' : ''} transition-transform`}>
-                <UserIcon className={`w-7 h-7 mb-1 ${isActive ? '' : 'text-slate-600'}`}
-                          style={isActive ? { color: 'var(--accent-start)' } : {}} />
+                <UserIcon className={`w-7 h-7 mb-1`}
+                          style={isActive ? { color: 'var(--accent-start)' } : { color: 'var(--text-color)', opacity: 0.6 }} />
                 {isActive && (
                   <div className="absolute -inset-2 rounded-full opacity-20" 
                        style={{ background: 'var(--accent-start)' }} />
                 )}
               </div>
-              <span className={`text-xs font-bold ${isActive ? '' : 'text-slate-600'}`}
-                    style={isActive ? { color: 'var(--accent-start)' } : {}}>
+              <span className={`text-xs font-bold`}
+                    style={isActive ? { color: 'var(--accent-start)' } : { color: 'var(--text-color)', opacity: 0.7 }}>
                 Perfil
               </span>
             </>

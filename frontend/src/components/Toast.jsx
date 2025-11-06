@@ -56,7 +56,7 @@ export default function Toast({ message, type = 'info', duration = 3000, onClose
   const style = colors[type] || colors.info;
 
   return (
-    <div className="fixed top-4 right-4 z-50 animate-slide-in-right">
+    <div className="fixed top-20 right-4 z-[200] animate-slide-in-right">
       <div className={`${style.bg} ${style.border} border rounded-lg shadow-lg p-4 min-w-[300px] max-w-md`}>
         <div className="flex items-start gap-3">
           <span className={`text-2xl ${style.icon}`}>

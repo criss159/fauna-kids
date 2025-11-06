@@ -1,10 +1,12 @@
 import React, { useMemo, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { PATHS } from "../../routes/paths";
+import JaggyAvatar from '../JaggyAvatar';
 
 export default function Navbar() {
   const { pathname } = useLocation();
   const title = useMemo(() => {
+    if (pathname === PATHS.ROOT) return 'Bienvenido';
     if (pathname.startsWith("/explorar")) return "Explorar";
     if (pathname.startsWith("/avatar")) return "Mi Avatar";
     if (pathname.startsWith("/jugar")) return "Jugar";
@@ -13,6 +15,9 @@ export default function Navbar() {
   }, [pathname]);
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isHoveringCancel, setIsHoveringCancel] = useState(false);
+  const navigate = useNavigate();
   
   // Inicializar estado con datos de localStorage si existen
   const [userData, setUserData] = useState(() => {
@@ -113,7 +118,6 @@ export default function Navbar() {
   const initial = (nick?.trim?.()[0] || 'E').toUpperCase();
   
   const menuRef = useRef(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     function onDocClick(e) {
@@ -125,6 +129,11 @@ export default function Navbar() {
   }, []);
 
   function handleLogout() {
+    setMenuOpen(false);
+    setShowLogoutModal(true);
+  }
+
+  function confirmLogout() {
     try {
       if (typeof window !== 'undefined') {
         // Limpiar todos los datos de autenticación
@@ -155,7 +164,8 @@ export default function Navbar() {
     >
       {title}
     </h1>
-    <div className="ml-auto relative flex items-center gap-2 sm:gap-3" ref={menuRef}>
+    {pathname !== PATHS.ROOT && (
+      <div className="ml-auto relative flex items-center gap-2 sm:gap-3" ref={menuRef}>
           <span className="hidden md:block text-white dark:text-white text-sm sm:text-base lg:text-xl font-semibold select-none drop-shadow-md">Hola, {nick} <span aria-hidden className="inline-block align-middle">👋</span></span>
           <button
             type="button"
@@ -236,8 +246,67 @@ export default function Navbar() {
               </button>
             </div>
           )}
-        </div>
       </div>
+    )}
+      </div>
+
+      {/* Modal de confirmación de cierre de sesión */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 animate-fade-in">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setShowLogoutModal(false)} />
+          <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 max-w-sm w-full animate-scale-in" style={{ background: 'var(--bg-surface)' }}>
+            <div className="flex flex-col items-center text-center">
+              {/* Jaggy cambia de emoción según hover */}
+              <JaggyAvatar 
+                emotion={isHoveringCancel ? "happy" : "sad"}
+                width={100}
+                height={100}
+                className="mb-4"
+              />
+              <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--text-color)' }}>
+                ¿Seguro que quieres salir?
+              </h3>
+              <p className="text-sm mb-6" style={{ color: 'var(--text-color)', opacity: 0.7 }}>
+                {isHoveringCancel ? "¡Qué bien que te quedes!" : "Jaggy te extrañará mucho..."}
+              </p>
+              <div className="flex gap-3 w-full">
+                <button
+                  onClick={() => setShowLogoutModal(false)}
+                  className="flex-1 px-4 py-2.5 rounded-lg font-semibold transition"
+                  style={{ 
+                    background: 'var(--bg-subtle)', 
+                    color: 'var(--text-color)',
+                    border: '1px solid var(--border-color)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.opacity = '0.8';
+                    setIsHoveringCancel(true);
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.opacity = '1';
+                    setIsHoveringCancel(false);
+                  }}
+                >
+                  No, quedarme
+                </button>
+                <button
+                  onClick={confirmLogout}
+                  className="flex-1 px-4 py-2.5 rounded-lg font-semibold transition"
+                  style={{
+                    background: '#ef4444',
+                    color: '#ffffff'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#dc2626'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = '#ef4444'}
+                >
+                  Sí, salir
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
+

@@ -1,103 +1,28 @@
-import React, { useCallback, useMemo } from 'react';
-import Particles from 'react-tsparticles';
-import { loadSlim } from 'tsparticles-slim';
-import { useTheme } from '../../theme';
+import React from 'react';
 
-const AnimatedBackground = ({ forceMode }) => {
-  const { mode } = useTheme();
-  const isDark = forceMode ? (forceMode === 'dark') : (mode === 'dark');
-  const particlesInit = useCallback(async (engine) => {
-    await loadSlim(engine);
-  }, []);
+// Versión ligera de AnimatedBackground: blobs suaves y movimientos sutiles.
+// Diseñada para ser poco intrusiva y respetar prefers-reduced-motion.
+const AnimatedBackground = () => {
+	return (
+		<div aria-hidden className="animated-bg fixed inset-0 -z-10 pointer-events-none">
+			<div className="blob blob-1" />
+			<div className="blob blob-2" />
+			<style>{`
+				.animated-bg { will-change: transform, opacity; }
+				.blob { position: absolute; border-radius: 9999px; filter: blur(36px); opacity: .9; transform: translateZ(0); }
+				.blob-1 { width: 420px; height: 420px; left: 6%; top: 8%; background: radial-gradient(circle at 30% 30%, rgba(124,58,237,0.95), rgba(99,102,241,0.7)); animation: blobFloat1 9s ease-in-out infinite; }
+				.blob-2 { width: 360px; height: 360px; right: 4%; bottom: 6%; background: radial-gradient(circle at 70% 70%, rgba(236,72,153,0.95), rgba(139,92,246,0.6)); animation: blobFloat2 11s ease-in-out infinite; }
 
-  const particlesOptions = useMemo(() => {
-    if (!isDark) {
-      // Modo claro: pétalos
-      return {
-        autoPlay: true,
-        background: { color: { value: 'transparent' } },
-        fullScreen: { enable: true, zIndex: 0 },
-        particles: {
-          number: { value: 36, density: { enable: true, value_area: 900 } },
-          shape: {
-            type: 'image',
-            image: { src: '/petals/sakura.svg', width: 500, height: 500 },
-          },
-          opacity: { value: { min: 0.25, max: 0.65 }, animation: { enable: true, speed: 0.25, sync: false } },
-          size: { value: { min: 12, max: 28 }, animation: { enable: true, speed: 1.8, sync: false } },
-          move: {
-            enable: true,
-            speed: 0.8,
-            direction: 'bottom',
-            straight: false,
-            outModes: { default: 'out' },
-            gravity: { enable: false, acceleration: 0 },
-            drift: { enable: true, value: 0.6 },
-            wobble: { enable: true, distance: 12, speed: 3 },
-          },
-          rotate: { value: { min: 0, max: 360 }, direction: 'random', animation: { enable: true, speed: 2 } },
-        },
-        interactivity: { detectsOn: 'canvas', events: { resize: true, onHover: { enable: false }, onClick: { enable: false } } },
-        detectRetina: true,
-      };
-    }
+				@keyframes blobFloat1 { 0% { transform: translateY(0) scale(1); } 50% { transform: translateY(-18px) scale(1.03); } 100% { transform: translateY(0) scale(1); } }
+				@keyframes blobFloat2 { 0% { transform: translateY(0) scale(1); } 50% { transform: translateY(16px) scale(.98); } 100% { transform: translateY(0) scale(1); } }
 
-    // Modo oscuro: luciérnagas/estrellas con constelaciones
-    return {
-      autoPlay: true,
-      background: { color: { value: 'transparent' } },
-      fullScreen: { enable: true, zIndex: 0 },
-      particles: {
-        number: { value: 150, density: { enable: true, value_area: 1000 } },
-        color: { value: ['#fff7cc', '#e9f1ff', '#c7d6ff'] },
-        shape: { type: 'circle' },
-        opacity: { value: { min: 0.4, max: 1 }, animation: { enable: true, speed: 1.1, sync: false } },
-        size: { value: { min: 1, max: 3 }, animation: { enable: true, speed: 0.55, sync: false } },
-        links: { enable: true, distance: 130, color: '#b8c5ff', opacity: 0.24, width: 0.8 },
-        move: {
-          enable: true,
-          speed: 0.2,
-          direction: 'none',
-          straight: false,
-          outModes: { default: 'out' },
-          random: true,
-          drift: { enable: false, value: 0 },
-          wobble: { enable: true, distance: 4, speed: 0.95 },
-        },
-      },
-      emitters: [
-        // ráfagas muy suaves de “twinklers” más brillantes
-        {
-          position: { x: 50, y: 30 },
-          rate: { delay: 5, quantity: 2 },
-          size: 0,
-          particles: {
-            move: { speed: 0.1, random: true },
-            size: { value: { min: 1.5, max: 3.2 } },
-            opacity: { value: 1, animation: { enable: true, speed: 1.6, minimumValue: 0.5 } },
-            color: { value: '#fffbd1' },
-            life: { duration: { sync: false, value: { min: 2, max: 6 } }, count: 0 },
-          },
-        },
-        {
-          position: { x: 80, y: 20 },
-          rate: { delay: 6, quantity: 1 },
-          size: 0,
-          particles: {
-            move: { speed: 0.12, random: true },
-            size: { value: { min: 1.2, max: 2.6 } },
-            opacity: { value: 1, animation: { enable: true, speed: 1.8, minimumValue: 0.4 } },
-            color: { value: '#eaf4ff' },
-            life: { duration: { sync: false, value: { min: 2, max: 6 } }, count: 0 },
-          },
-        },
-      ],
-      interactivity: { detectsOn: 'canvas', events: { resize: true, onHover: { enable: false }, onClick: { enable: false } } },
-      detectRetina: true,
-    };
-  }, [isDark]);
-
-  return <Particles id="tsparticles" init={particlesInit} options={particlesOptions} style={{ pointerEvents: 'none' }} />;
+				/* Respeta preferencia de reducir movimiento */
+				@media (prefers-reduced-motion: reduce) {
+					.blob { animation: none !important; }
+				}
+			`}</style>
+		</div>
+	);
 };
 
 export default AnimatedBackground;

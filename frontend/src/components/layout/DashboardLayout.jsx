@@ -6,6 +6,7 @@ import Footer from './Footer.jsx';
 import MobileNav from './MobileNav.jsx';
 import AnimatedBackground from './AnimatedBackground.jsx';
 import SceneLayers from '../scene/SceneLayers.jsx';
+import FloatingParticles from './FloatingParticles.jsx';
 
 function DashboardLayout({ children }) {
   const navigate = useNavigate();
@@ -18,18 +19,15 @@ function DashboardLayout({ children }) {
   }, [navigate]);
 
   return (
-    <div className="app-bg relative min-h-screen">
-  <SceneLayers />
-  <AnimatedBackground />
+    <div className="app-bg relative min-h-screen" style={{ isolation: 'isolate' }}>
+      <FloatingParticles />
       <Sidebar />
       <Navbar />
-      <main className="relative z-10 flex-1 pt-20 sm:pl-20 md:peer-hover:pl-64 transition-[padding] duration-300 pb-24 sm:pb-4">
+      <main className="relative flex-1 pt-20 sm:pl-20 md:peer-hover:pl-64 transition-[padding] duration-300 pb-24 sm:pb-4" style={{ zIndex: 10 }}>
         {children}
       </main>
       <MobileNav />
-      <div className="hidden sm:block">
-        <Footer />
-      </div>
+      <Footer />
     </div>
   );
 }

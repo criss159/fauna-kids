@@ -9,7 +9,7 @@ import {
     isGuestUser
 } from '../services/explorerChat.service';
 import DashboardLayout from '../components/layout/DashboardLayout.jsx'
-import avatarImg from '../assets/avatars/dino.png'
+import JaggyAvatar from '../components/JaggyAvatar.jsx'
 
 export default function Explorer(){
     // Estado de carga inicial para evitar errores de hidratación
@@ -82,8 +82,39 @@ export default function Explorer(){
     const chatRef = useRef(null)
     const recognitionRef = useRef(null)
     const audioRef = useRef(null) // Referencia al audio actual para poder detenerlo
-    const avatarSrc = avatarImg
     const headerIcon = '/logo.png'
+
+    // Detectar emoción según el último mensaje del asistente
+    const [currentEmotion, setCurrentEmotion] = useState('neutral')
+
+    // Función helper para detectar emoción en texto
+    const detectEmotion = useCallback((text) => {
+        if (!text) return 'neutral';
+        const lower = text.toLowerCase();
+        // Palabras clave para emociones
+        if (lower.match(/jaja|jeje|😂|🤣|divertido|gracioso|genial|increíble|excelente|maravilloso/)) {
+            return 'happy';
+        }
+        if (lower.match(/sorprend|asombr|wow|increíble|vaya|guau|😲|😮/)) {
+            return 'surprised';
+        }
+        if (lower.match(/triste|pena|lament|😢|😭|desafortunadamente|lástima/)) {
+            return 'sad';
+        }
+        if (lower.match(/peligro|cuidado|no debes|advertencia|⚠️|😠|enojado/)) {
+            return 'angry';
+        }
+        return 'neutral';
+    }, []);
+
+    // Efecto para actualizar emoción cuando cambian los mensajes
+    useEffect(() => {
+        const lastAssistantMsg = messages.slice().reverse().find(m => m.role === 'assistant');
+        if (lastAssistantMsg?.text) {
+            const detectedEmotion = detectEmotion(lastAssistantMsg.text);
+            setCurrentEmotion(detectedEmotion);
+        }
+    }, [messages, detectEmotion]);
 
     useEffect(()=>{
         if(typeof window !== 'undefined'){
@@ -614,81 +645,103 @@ export default function Explorer(){
                 <section className="mx-auto max-w-7xl px-3 sm:px-4 py-2 sm:py-3">
                     <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-4">
                         {/* Panel lateral con el avatar guía y botón Nuevo Chat */}
-                        <aside className="hidden lg:block rounded-2xl border p-4 sticky top-20 self-start max-h-[85vh] flex flex-col" style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)' }}>
-                            <div className="flex flex-col items-center text-center">
+                        <aside className="hidden lg:flex flex-col rounded-2xl border p-4 sticky top-20 self-start max-h-[85vh] overflow-hidden" style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)' }}>
+                            {/* Header con Jaggy y botón Nuevo Chat */}
+                            <div className="flex flex-col items-center text-center flex-shrink-0">
                                 <div className="relative">
                                     <div className="absolute -inset-1 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full blur opacity-25"></div>
-                                    <img src={avatarSrc} alt="Dino" className="relative w-20 h-20 object-contain drop-shadow-lg" />
+                                    <JaggyAvatar 
+                                        emotion={currentEmotion} 
+                                        isSpeaking={isSpeaking}
+                                        width={80}
+                                        height={80}
+                                        className="relative drop-shadow-lg"
+                                    />
                                 </div>
-                                <h3 className="mt-2 text-base font-bold">Dino</h3>
-                                                <p className="mt-1 text-xs text-slate-600">Tu guía de fauna</p>
-                                                
-                                                {/* Botón Nuevo Chat */}
+                                <h3 className="mt-2 text-base font-bold" style={{ color: 'var(--text-color)' }}>Jaggy</h3>
+                                <p className="mt-1 text-xs" style={{ color: 'var(--text-color)', opacity: 0.7 }}>Tu guía de fauna</p>
+                                
+                                {/* Botón Nuevo Chat */}
+                                <button
+                                    onClick={handleNewChat}
+                                    className="mt-3 w-full px-3 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-semibold hover:from-purple-600 hover:to-pink-600 transition flex items-center justify-center gap-2"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    Nuevo Chat
+                                </button>
+                            </div>
+
+                            {/* Lista de conversaciones guardadas - OCUPA TODO EL ESPACIO */}
+                            {chatList?.length > 0 && (
+                                <div className="mt-4 flex-1 overflow-hidden flex flex-col min-h-0">
+                                    <h4 className="text-sm font-semibold mb-2 px-1 flex-shrink-0" style={{ color: 'var(--text-color)' }}>Historial</h4>
+                                    <div className="overflow-y-auto flex-1 space-y-1.5 pr-1 min-h-0">
+                                        {chatList?.map(chat => (
+                                            <div
+                                                key={chat.id}
+                                                onClick={() => loadChat(chat.id)}
+                                                className="group relative w-full p-2.5 rounded-lg cursor-pointer transition text-left block"
+                                                style={{
+                                                    background: currentChatId === chat.id 
+                                                        ? 'rgba(168, 85, 247, 0.15)' 
+                                                        : 'transparent'
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    if (currentChatId !== chat.id) {
+                                                        e.currentTarget.style.background = 'var(--bg-subtle)';
+                                                    }
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    if (currentChatId !== chat.id) {
+                                                        e.currentTarget.style.background = 'transparent';
+                                                    }
+                                                }}
+                                            >
+                                                <div className="w-full pr-8">
+                                                    <p className="text-sm font-medium truncate w-full" style={{ color: 'var(--text-color)' }}>{chat.title}</p>
+                                                    <p className="text-xs mt-0.5" style={{ color: 'var(--text-color)', opacity: 0.6 }}>
+                                                        {new Date(chat.timestamp).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                                                    </p>
+                                                </div>
                                                 <button
-                                                    onClick={handleNewChat}
-                                                    className="mt-3 w-full px-3 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-semibold hover:from-purple-600 hover:to-pink-600 transition flex items-center justify-center gap-2"
+                                                    onClick={(e) => deleteChatFunc(chat.id, e)}
+                                                    className="absolute top-2.5 right-2.5 p-1.5 rounded opacity-0 group-hover:opacity-100 transition z-10"
+                                                    style={{ color: '#ef4444' }}
+                                                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'}
+                                                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                                    title="Eliminar chat"
                                                 >
                                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                     </svg>
-                                                    Nuevo Chat
                                                 </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
-                                                {/* Lista de conversaciones guardadas - MÁS COMPACTA */}
-                                                {chatList?.length > 0 && (
-                                                    <div className="mt-4 flex-1 overflow-hidden flex flex-col">
-                                                        <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 px-1">Historial</h4>
-                                                        <div className="overflow-y-auto flex-1 space-y-1.5 pr-1" style={{ maxHeight: '300px' }}>
-                                                            {chatList?.map(chat => (
-                                                                <div
-                                                                    key={chat.id}
-                                                                    onClick={() => loadChat(chat.id)}
-                                                                    className={`group relative w-full p-2.5 rounded-lg cursor-pointer transition text-left block ${
-                                                                        currentChatId === chat.id 
-                                                                            ? 'bg-purple-100 dark:bg-purple-900/30' 
-                                                                            : 'hover:bg-slate-100 dark:hover:bg-slate-800'
-                                                                    }`}
-                                                                >
-                                                                    <div className="w-full pr-8">
-                                                                        <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate w-full">{chat.title}</p>
-                                                                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                                                                            {new Date(chat.timestamp).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
-                                                                        </p>
-                                                                    </div>
-                                                                    <button
-                                                                        onClick={(e) => deleteChatFunc(chat.id, e)}
-                                                                        className="absolute top-2.5 right-2.5 p-1.5 rounded opacity-0 group-hover:opacity-100 hover:bg-red-100 dark:hover:bg-red-900/30 transition z-10"
-                                                                        title="Eliminar chat"
-                                                                    >
-                                                                        <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                                        </svg>
-                                                                    </button>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                )}
-
-                                                <div className="mt-4 w-full rounded-xl p-3 text-left text-xs border" style={{ background: 'var(--bg-subtle)', borderColor: 'var(--border-color)' }}>
-                                                    <p className="text-slate-700 font-semibold mb-2 flex items-center gap-1">
-                                                        <span>💡</span> Sugerencias
-                                                    </p>
-                                                    <ul className="space-y-1.5 text-slate-600">
-                                                        <li className="flex items-start gap-2">
-                                                            <span className="text-purple-500 mt-0.5">•</span>
-                                                            <span>¿Dónde vive el pingüino?</span>
-                                                        </li>
-                                                        <li className="flex items-start gap-2">
-                                                            <span className="text-purple-500 mt-0.5">•</span>
-                                                            <span>Curiosidad del tiburón</span>
-                                                        </li>
-                                                        <li className="flex items-start gap-2">
-                                                            <span className="text-purple-500 mt-0.5">•</span>
-                                                            <span>Muestra un león</span>
-                                                        </li>
-                                                    </ul>
-                                                </div>
+                            {/* Sugerencias */}
+                            <div className="mt-4 w-full rounded-xl p-3 text-left text-xs border flex-shrink-0" style={{ background: 'var(--bg-subtle)', borderColor: 'var(--border-color)' }}>
+                                <p className="font-semibold mb-2 flex items-center gap-1" style={{ color: 'var(--text-color)' }}>
+                                    <span>💡</span> Sugerencias
+                                </p>
+                                <ul className="space-y-1.5" style={{ color: 'var(--text-color)', opacity: 0.8 }}>
+                                    <li className="flex items-start gap-2">
+                                        <span className="text-purple-500 mt-0.5">•</span>
+                                        <span>¿Dónde vive el pingüino?</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <span className="text-purple-500 mt-0.5">•</span>
+                                        <span>Curiosidad del tiburón</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <span className="text-purple-500 mt-0.5">•</span>
+                                        <span>Muestra un león</span>
+                                    </li>
+                                </ul>
                             </div>
                         </aside>
 
@@ -742,7 +795,7 @@ export default function Explorer(){
                                 </button>
                             </div>
 
-                    <div ref={listRef} className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2.5" aria-live="polite">
+                    <div ref={listRef} className="flex-1 overflow-y-auto p-3 sm:p-4 pb-20 space-y-2.5" aria-live="polite">
                                 {messages.map((m, i) => {
                                     const bubbleCls = [
                                         "max-w-[72%] rounded-2xl shadow fun-pop-in",
@@ -858,19 +911,22 @@ export default function Explorer(){
                 {/* Panel móvil de historial de chats */}
                 {showChatList && (
                     <div 
-                        className="lg:hidden fixed inset-0 z-50 bg-black/50 animate-fadeIn"
+                        className="lg:hidden fixed inset-0 z-[100] bg-black/50 animate-fadeIn"
                         onClick={() => setShowChatList(false)}
                     >
                         <div 
-                            className="absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-white dark:bg-slate-900 shadow-2xl p-4 overflow-y-auto"
+                            className="absolute right-0 top-0 h-full w-80 max-w-[85vw] shadow-2xl pt-20 px-4 pb-4 overflow-y-auto"
                             onClick={(e) => e.stopPropagation()}
-                            style={{ background: 'var(--bg-surface)' }}
+                            style={{ background: 'var(--bg-surface)', color: 'var(--text-color)' }}
                         >
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="text-lg font-bold" style={{ color: 'var(--text-color)' }}>Historial de Chats</h3>
                                 <button
                                     onClick={() => setShowChatList(false)}
-                                    className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
+                                    className="p-2 rounded-full transition"
+                                    style={{ color: 'var(--text-color)' }}
+                                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-subtle)'}
+                                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                                 >
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -879,7 +935,7 @@ export default function Explorer(){
                             </div>
 
                             {!chatList || chatList.length === 0 ? (
-                                <div className="text-center py-8 text-slate-500">
+                                <div className="text-center py-8" style={{ color: 'var(--text-color)', opacity: 0.6 }}>
                                     <svg className="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                     </svg>
@@ -891,20 +947,28 @@ export default function Explorer(){
                                         <div
                                             key={chat.id}
                                             onClick={() => loadChat(chat.id)}
-                                            className={`group relative w-full p-4 rounded-lg cursor-pointer transition block ${
-                                                currentChatId === chat.id 
-                                                    ? 'bg-purple-100' 
-                                                    : 'hover:bg-slate-100 dark:hover:bg-slate-800'
-                                            }`}
+                                            className="group relative w-full p-4 rounded-lg cursor-pointer transition block"
                                             style={{ 
-                                                background: currentChatId === chat.id ? undefined : 'var(--bg-subtle)'
+                                                background: currentChatId === chat.id 
+                                                    ? 'rgba(168, 85, 247, 0.15)' 
+                                                    : 'var(--bg-subtle)'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                if (currentChatId !== chat.id) {
+                                                    e.currentTarget.style.background = 'var(--border-color)';
+                                                }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                if (currentChatId !== chat.id) {
+                                                    e.currentTarget.style.background = 'var(--bg-subtle)';
+                                                }
                                             }}
                                         >
                                             <div className="w-full pr-10">
                                                 <p className="text-sm font-medium truncate w-full" style={{ color: 'var(--text-color)' }}>
                                                     {chat.title}
                                                 </p>
-                                                <p className="text-xs text-slate-500 mt-1.5">
+                                                <p className="text-xs mt-1.5" style={{ color: 'var(--text-color)', opacity: 0.6 }}>
                                                     {new Date(chat.timestamp).toLocaleDateString('es-ES', { 
                                                         day: 'numeric', 
                                                         month: 'short',

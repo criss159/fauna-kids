@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout.jsx';
+import JaggyAvatar from '../components/JaggyAvatar';
 import { getUserStats, getUserProfile } from '../services/user.service';
 import { getAnimalsExplored, isGuestUser } from '../services';
 
@@ -101,16 +102,18 @@ export default function Dashboard() {
               </h2>
               <p className="mt-2 text-slate-600 text-xs sm:text-sm md:text-base">
                 {stats.totalMessages > 0 
-                  ? `Has explorado ${stats.totalAnimals} animales en ${stats.totalSessions} conversaciones` 
+                  ? `Has explorado ${stats.totalAnimales} animales en ${stats.totalSessions} conversaciones` 
                   : 'Explora animales y descubre datos fascinantes de la fauna'}
               </p>
             </div>
-            <img
-              src="/animals/fox.svg"
-              alt="Avatar"
-  className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-lg p-2 sm:p-3 border self-center sm:self-auto"
-  style={{ background: 'var(--bg-subtle)', borderColor: 'var(--border-color)' }}
-            />
+            <div className="self-center sm:self-auto">
+              <JaggyAvatar 
+                emotion="happy" 
+                width={96} 
+                height={96}
+                className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24"
+              />
+            </div>
           </div>
         </div>
 

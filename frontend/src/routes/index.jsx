@@ -4,6 +4,7 @@ import { PATHS } from './paths';
 import ProtectedRoute from './ProtectedRoute';
 import NotFound from './NotFound';
 
+const Welcome = lazy(()=> import('../pages/Welcome.jsx'));
 const Login = lazy(()=> import('../pages/Login.jsx'));
 const Dashboard = lazy(()=> import('../pages/Dashboard.jsx'));
 const Explorer = lazy(()=> import('../pages/Explorer.jsx'));
@@ -17,7 +18,7 @@ const suspense = (node) => (
 );
 
 export const router = createBrowserRouter([
-  { path: PATHS.ROOT, element: suspense(<Login />) },
+  { path: PATHS.ROOT, element: suspense(<Welcome />) },
   { path: PATHS.LOGIN, element: suspense(<Login />) },
   {
     element: <ProtectedRoute />,
