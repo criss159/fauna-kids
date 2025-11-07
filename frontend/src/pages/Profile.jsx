@@ -4,7 +4,7 @@ import DashboardLayout from '../components/layout/DashboardLayout.jsx';
 import { getUserProfile, getUserStats, updateUserProfile, logout } from '../services/user.service';
 import { useTheme } from '../theme';
 import Toast from '../components/Toast';
-import ConfirmModal from '../components/ConfirmModal';
+import JaggyAvatar from '../components/JaggyAvatar';
 
 export default function ProfilePage(){
   const navigate = useNavigate();
@@ -19,6 +19,7 @@ export default function ProfilePage(){
   // Estados para notificaciones
   const [toast, setToast] = useState(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isHoveringCancel, setIsHoveringCancel] = useState(false);
 
   useEffect(() => {
     loadUserData();
@@ -322,16 +323,61 @@ export default function ProfilePage(){
     )}
     
     {/* Modal de confirmación de cierre de sesión */}
-    <ConfirmModal
-      isOpen={showLogoutConfirm}
-      title="¿Cerrar sesión?"
-      message="¿Estás seguro que quieres salir? Tus datos están guardados."
-      confirmText="Sí, cerrar sesión"
-      cancelText="Cancelar"
-      type="danger"
-      onConfirm={confirmLogout}
-      onCancel={() => setShowLogoutConfirm(false)}
-    />
+    {showLogoutConfirm && (
+      <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 animate-fade-in">
+        <div className="absolute inset-0 bg-black/50" onClick={() => setShowLogoutConfirm(false)} />
+        <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 max-w-sm w-full animate-scale-in" style={{ background: 'var(--bg-surface)' }}>
+          <div className="flex flex-col items-center text-center">
+            {/* Jaggy cambia de emoción según hover */}
+            <JaggyAvatar 
+              emotion={isHoveringCancel ? "happy" : "sad"}
+              width={100}
+              height={100}
+              className="mb-4"
+            />
+            <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--text-color)' }}>
+              ¿Seguro que quieres salir?
+            </h3>
+            <p className="text-sm mb-6" style={{ color: 'var(--text-color)', opacity: 0.7 }}>
+              {isHoveringCancel ? "¡Qué bien que te quedes!" : "Jaggy te extrañará mucho..."}
+            </p>
+            <div className="flex gap-3 w-full">
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="flex-1 px-4 py-2.5 rounded-lg font-semibold transition"
+                style={{ 
+                  background: 'var(--bg-subtle)', 
+                  color: 'var(--text-color)',
+                  border: '1px solid var(--border-color)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = '0.8';
+                  setIsHoveringCancel(true);
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = '1';
+                  setIsHoveringCancel(false);
+                }}
+              >
+                No, quedarme
+              </button>
+              <button
+                onClick={confirmLogout}
+                className="flex-1 px-4 py-2.5 rounded-lg font-semibold transition"
+                style={{
+                  background: '#ef4444',
+                  color: '#ffffff'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#dc2626'}
+                onMouseLeave={(e) => e.currentTarget.style.background = '#ef4444'}
+              >
+                Sí, salir
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
   </DashboardLayout>
   );
 }
