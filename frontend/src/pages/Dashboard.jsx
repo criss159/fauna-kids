@@ -102,7 +102,7 @@ export default function Dashboard() {
               </h2>
               <p className="mt-2 text-slate-600 text-xs sm:text-sm md:text-base">
                 {stats.totalMessages > 0 
-                  ? `Has explorado ${stats.totalAnimales} animales en ${stats.totalSessions} conversaciones` 
+                  ? `Has explorado ${stats.totalAnimals} animales en ${stats.totalChats} conversaciones` 
                   : 'Explora animales y descubre datos fascinantes de la fauna'}
               </p>
             </div>
