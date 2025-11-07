@@ -31,7 +31,7 @@ async function refreshAccessToken() {
   }
   
   try {
-    const response = await fetch(`${API_BASE}/auth/token/refresh/`, {
+    const response = await fetch(`${API_BASE}/auth/token/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refresh: refreshToken })
@@ -46,8 +46,11 @@ async function refreshAccessToken() {
     // Guardar el nuevo access token
     localStorage.setItem('access_token', data.access);
     
+    console.log('✅ Token renovado exitosamente');
+    
     return data.access;
   } catch (error) {
+    console.error('❌ Error al renovar token:', error);
     // Si el refresh token también expiró, limpiar y redirigir al login
     localStorage.clear();
     window.location.href = '/login';
@@ -71,7 +74,8 @@ async function request(path, { method = 'GET', headers = {}, body } = {}) {
   };
   
   // Agregar token de autorización si existe
-  if (token) {
+  // No enviar el Authorization header a endpoints públicos de auth (guest, login, register, google, refresh)
+  if (token && !path.includes('/auth/guest') && !path.includes('/auth/google') && !path.includes('/auth/login') && !path.includes('/auth/register') && !path.includes('/auth/token/refresh')) {
     init.headers['Authorization'] = `Bearer ${token}`;
   }
   
@@ -82,61 +86,57 @@ async function request(path, { method = 'GET', headers = {}, body } = {}) {
   const res = await fetch(url, init);
   
   // Si el token expiró (401), intentar renovarlo
-  if (res.status === 401 && !path.includes('/auth/')) {
-    const errorText = await res.text().catch(() => '');
+  if (res.status === 401 && !path.includes('/auth/token/refresh') && !path.includes('/auth/login') && !path.includes('/auth/register') && !path.includes('/auth/guest') && !path.includes('/auth/google')) {
+    console.log('⚠️ Token expirado (401), intentando renovar...');
     
-    // Verificar si es un error de token expirado
-    if (errorText.includes('expired') || errorText.includes('token_not_valid')) {
-      
-      // Si ya hay una renovación en proceso, esperar
-      if (isRefreshing) {
-        return new Promise((resolve) => {
-          subscribeTokenRefresh((newToken) => {
-            // Reintentar la petición original con el nuevo token
-            init.headers['Authorization'] = `Bearer ${newToken}`;
-            fetch(url, init)
-              .then(response => {
-                if (response.ok) {
-                  const contentType = response.headers.get('content-type') || '';
-                  if (contentType.includes('application/json')) {
-                    return response.json();
-                  }
-                  return response.text();
+    // Si ya hay una renovación en proceso, esperar
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        subscribeTokenRefresh((newToken) => {
+          // Reintentar la petición original con el nuevo token
+          init.headers['Authorization'] = `Bearer ${newToken}`;
+          fetch(url, init)
+            .then(response => {
+              if (response.ok) {
+                const contentType = response.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) {
+                  return response.json();
                 }
-                throw new Error(`API ${response.status}: ${response.statusText}`);
-              })
-              .then(resolve)
-              .catch(resolve);
-          });
+                return response.text();
+              }
+              throw new Error(`API ${response.status}: ${response.statusText}`);
+            })
+            .then(resolve)
+            .catch(reject);
         });
+      });
+    }
+    
+    // Marcar que estamos renovando
+    isRefreshing = true;
+    
+    try {
+      const newToken = await refreshAccessToken();
+      isRefreshing = false;
+      onTokenRefreshed(newToken);
+      
+      // Reintentar la petición original con el nuevo token
+      init.headers['Authorization'] = `Bearer ${newToken}`;
+      const retryRes = await fetch(url, init);
+      
+      if (!retryRes.ok) {
+        const text = await retryRes.text().catch(() => '');
+        throw new Error(`API ${retryRes.status}: ${text || retryRes.statusText}`);
       }
       
-      // Marcar que estamos renovando
-      isRefreshing = true;
-      
-      try {
-        const newToken = await refreshAccessToken();
-        isRefreshing = false;
-        onTokenRefreshed(newToken);
-        
-        // Reintentar la petición original con el nuevo token
-        init.headers['Authorization'] = `Bearer ${newToken}`;
-        const retryRes = await fetch(url, init);
-        
-        if (!retryRes.ok) {
-          const text = await retryRes.text().catch(() => '');
-          throw new Error(`API ${retryRes.status}: ${text || retryRes.statusText}`);
-        }
-        
-        const contentType = retryRes.headers.get('content-type') || '';
-        if (contentType.includes('application/json')) {
-          return retryRes.json();
-        }
-        return retryRes.text();
-      } catch (refreshError) {
-        isRefreshing = false;
-        throw refreshError;
+      const contentType = retryRes.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        return retryRes.json();
       }
+      return retryRes.text();
+    } catch (refreshError) {
+      isRefreshing = false;
+      throw refreshError;
     }
   }
   

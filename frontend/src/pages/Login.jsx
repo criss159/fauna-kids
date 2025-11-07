@@ -55,7 +55,22 @@ function LoginContent() {
       navigate('/dashboard');
     } catch (err) {
       console.error('Error al crear sesión de invitado:', err);
-      setError('Hubo un error. Intenta de nuevo.');
+      
+      // Extraer mensaje de error amigable
+      let errorMessage = 'Hubo un error. Intenta de nuevo.';
+      
+      if (err.message) {
+        // Si el error contiene JSON, intentar parsearlo
+        try {
+          const errorData = JSON.parse(err.message.split(': ')[1] || err.message);
+          errorMessage = errorData.detail || errorData.error || errorMessage;
+        } catch {
+          // Si no es JSON, usar el mensaje directamente (limpiado)
+          errorMessage = err.message.replace(/^API \d+: /, '');
+        }
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -91,7 +106,23 @@ function LoginContent() {
       // Forzar actualización completa de la página para que todos los componentes se actualicen
       window.location.href = '/dashboard';
     } catch (err) {
-      setError(`Error: ${err.message || 'No se pudo iniciar sesión con Google'}`);
+      console.error('Error en Google login:', err);
+      
+      // Extraer mensaje de error amigable
+      let errorMessage = 'No se pudo iniciar sesión con Google';
+      
+      if (err.message) {
+        // Si el error contiene JSON, intentar parsearlo
+        try {
+          const errorData = JSON.parse(err.message.split(': ')[1] || err.message);
+          errorMessage = errorData.detail || errorData.error || errorMessage;
+        } catch {
+          // Si no es JSON, usar el mensaje directamente (limpiado)
+          errorMessage = err.message.replace(/^API \d+: /, '');
+        }
+      }
+      
+      setError(`Error: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
