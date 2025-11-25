@@ -3,6 +3,7 @@ import { createBrowserRouter } from 'react-router-dom';
 import { PATHS } from './paths';
 import ProtectedRoute from './ProtectedRoute';
 import NotFound from './NotFound';
+import Loading from '../components/Loading';
 
 const Welcome = lazy(()=> import('../pages/Welcome.jsx'));
 const Login = lazy(()=> import('../pages/Login.jsx'));
@@ -12,7 +13,7 @@ const Profile = lazy(()=> import('../pages/Profile.jsx'));
 const Settings = lazy(()=> import('../pages/Settings.jsx'));
 
 const suspense = (node) => (
-  <Suspense fallback={<div className="p-8">Cargando...</div>}>
+  <Suspense fallback={<Loading />}>
     {node}
   </Suspense>
 );

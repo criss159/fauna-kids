@@ -172,6 +172,13 @@ html, body, #root {
   100% { opacity: 0; transform: translateY(-16px) scale(1.1) rotate(10deg); }
 }
 
+/* Slow spin used for loading indicator */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.spin-slow { animation: spin 3s linear infinite; }
+
 /* Utilidades */
 .fun-pop-in { animation: fk-pop-in 220ms ease-out both; }
 .fun-wiggle:hover { animation: fk-wiggle 420ms ease-in-out; }
@@ -199,10 +206,13 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: transparent;
   cursor: pointer;
   transition: border-color 0.25s;
 }
+
+/* Legacy helper: use this class when an explicit dark button is desired */
+button.legacy-dark { background-color: #1a1a1a; }
 button:hover {
   border-color: #646cff;
 }
