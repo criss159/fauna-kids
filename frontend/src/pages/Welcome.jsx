@@ -4,9 +4,19 @@ import Navbar from '../components/layout/Navbar';
 import JaggyAnimator from '../components/JaggyAnimator';
 import jaggyaSrc from '../assets/avatars/jaggya.png';
 import jaggybSrc from '../assets/avatars/jaggyb.png';
+import { logout, isAuthenticated } from '../services/auth.service';
 
 export default function Welcome(){
   const navigate = useNavigate();
+
+  const handleExploreAsGuest = async () => {
+    // Si hay una sesión activa (Google u otra), cerrarla primero
+    if (isAuthenticated()) {
+      await logout();
+    }
+    // Navegar al explorador
+    navigate('/explorar');
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-pink-300 via-purple-300 to-indigo-200 text-slate-900">
@@ -31,7 +41,7 @@ export default function Welcome(){
               </button>
 
               <button
-                onClick={() => navigate('/explorar')}
+                onClick={handleExploreAsGuest}
                 className="px-5 py-3 rounded-full font-semibold bg-white/90 border border-indigo-200 shadow-sm hover:scale-[1.02] transition-transform text-center"
               >
                 Explorar sin registro
