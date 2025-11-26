@@ -526,29 +526,44 @@ export default function Explorer(){
         setIsThinking(true)
 
         try{
-            // Detecta intención de imagen (más amplia y flexible en español)
-            const imageWords = /(imagen|ilustraci[oó]n|dibujo|foto|p[oó]ster|sticker|wallpaper|fondo|pint(a|ame)|dibuja|genera( r)?\s+una?\s+imagen|ver\s+imagen)/i
-            const showWords = /(muestra|muestras|mostrar|mu[eé]strame|muestrame|ens[eé]ñame|quiero\s+ver|puedes\s+(hacer|generar|mostrar)|pasas|pasa|dame|d[aá]me)/i
-            const seeWords = /(c[oó]mo|como)\s+(se|es|son)\s+ve|(c[oó]mo|como)\s+(son|es)|verlo|verla|verle|ver\s+(un|una|al|a\s+la)/i
-            const animalWords = /\b(un|una|el|la|los|las|al|a\s+la)\s+[a-záéíóúñü]{4,}s?\b/i  // "un caballo", "la jirafa", "los leones"
+            // ====================================================================
+            // DETECCIÓN DE SOLICITUD DE IMAGEN - OPTIMIZADA PARA NIÑOS
+            // ====================================================================
             
-            // Detecta imagen si:
-            // 1. Tiene palabra explícita de imagen (imagen, foto, dibujo)
-            // 2. Pide mostrar/ver algo (muestra + ver/como se ve/como son)
-            // 3. Pide mostrar + menciona un animal ("muestra un caballo")
-            const wantsImage = imageWords.test(text) || 
-                             (showWords.test(text) && seeWords.test(text)) ||
-                             (showWords.test(text) && animalWords.test(text))
+            // Palabras clave que SIEMPRE indican que quiere una imagen
+            const explicitImageWords = /\b(imagen|imagenes|ilustraci[oó]n|dibujo|dibuja|foto|fotos|pint(a|ame|ar)|genera)\b/i
             
-
-
-            // Si SOLO pide una imagen (frase corta), dar respuesta breve
-            const isOnlyImageRequest = wantsImage && text.split(' ').length <= 10
+            // Frases muy comunes en niños (simples y directas) - MÁS AMPLIO
+            const childFriendlyRequests = /^(aver|a ver|ver|mira|muestra|mu[eé]strame|mostrar|ense[ñn]a|ense[ñn]ame|dame|pasame|pasa|quiero ver|puedo ver|me das|me ense[ñn]as|me muestras|hazme|h[aá]zmelo|muestras|uno|una|ese|esa|eso|este|esta|esto|ponme|hazlo|sacalo|s[aá]calo)[\s\.\!,]*/i
             
-            // Preparar el mensaje con instrucción si solo pide imagen
-            const userMessage = isOnlyImageRequest 
-                ? `${text}\n\n[INSTRUCCIÓN: Responde en UNA sola frase corta confirmando que generarás la imagen. Ejemplo: "¡Claro! Aquí tienes la imagen de [animal]."]`
-                : text
+            // Detecta si mencionó un animal EN EL MENSAJE ACTUAL
+            const mentionsAnimalNow = /\b(le[oó]n|leones|tigre|tigres|elefante|elefantes|jirafa|jirafas|cebra|cebras|ping[üu]ino|pinguinos|oso|osos|lobo|lobos|zorro|zorros|mapache|mapaches|ballena|ballenas|delf[ií]n|delfines|tiburón|tiburones|[aá]guila|aguilas|serpiente|serpientes|cocodrilo|cocodrilos|hipopótamo|hipopotamos|rinoceronte|rinocerontes|canguro|canguros|koala|koalas|panda|pandas|mono|monos|gorila|gorilas|chimpanc[eé]|loro|loros|tucán|tucanes|flamenco|flamencos|b[uú]ho|buhos|halcón|halcones|tortuga|tortugas|lagarto|lagartos|rana|ranas|sapo|sapos|mariposa|mariposas|abeja|abejas|hormiga|hormigas|ara[ñn]a|aranas|escorpi[oó]n|escorpiones|cangrejo|cangrejos|pulpo|pulpos|calamar|calamares|medusa|medusas|pez|peces|salm[oó]n|salmones|at[uú]n|atunes|caballo|caballos|vaca|vacas|cerdo|cerdos|oveja|ovejas|cabra|cabras|gallina|gallinas|pato|patos|ganso|gansos|conejo|conejos|rat[oó]n|ratones|murci[eé]lago|murcielagos|foca|focas|morsa|morsas|nutria|nutrias|castor|castores|ardilla|ardillas|erizo|erizos|lince|linces|guepardo|guepardos|leopardo|leopardos|jaguar|jaguares|puma|pumas|pantera|panteras|hiena|hienas|suricata|suricatas|perezoso|perezosos|armadillo|armadillos|ornitorrinco|ornitorrincos|wombat|wombats|quokka|quokkas|wallaby|wallabies|oposum|oposums|marmota|marmotas|puercoespín|puercoespines|coatí|coaties|tejón|tejones|armi[ñn]o|arminos|comadreja|comadrejas|hurón|hurones|marta|martas|glotón|glotones|anaconda|anacondas|cobra|cobras|pitón|pitones|v[ií]bora|viboras|caimán|caimanes|iguana|iguanas|camaleón|camaleon|gecko|geckos|salamandra|salamandras|tritón|tritones|ajolote|ajolotes|anguila|anguilas|raya|rayas|mantarraya|mantarrayas|piraña|piranas|barracuda|barracudas|morena|morenas|caballito de mar|caballitos de mar|estrella de mar|estrellas de mar|coral|corales|esponja|esponjas|caracol|caracoles|almeja|almejas|mejill[oó]n|mejillones|ostra|ostras|sepia|sepias|nautilo|nautilos|langosta|langostas|camar[oó]n|camarones|gamba|gambas|cigarra|cigarras|grillo|grillos|saltamontes|escarabajo|escarabajos|mariquita|mariquitas|luci[eé]rnaga|luciernagas|libélula|lib[eé]lulas|mosca|moscas|mosquito|mosquitos|avispa|avispas|abejorro|abejorros|polilla|polillas|oruga|orugas|gusano|gusanos|lombriz|lombrices|babosa|babosas|ciervo|ciervos|alce|alces|reno|renos|antílope|ant[ií]lopes|gacela|gacelas|[ñn]u|[ñn]ues|b[uú]falo|bufalos|bisonte|bisontes|camello|camellos|dromedario|dromedarios|llama|llamas|alpaca|alpacas|vicu[ñn]a|vicunas|guanaco|guanacos)\b/i
+            
+            // Extrae animal mencionado en mensajes recientes (últimos 3 del asistente)
+            const recentMessages = messages.slice(-6).filter(m => m.role === 'assistant').map(m => m.text).join(' ')
+            const hasRecentAnimalContext = mentionsAnimalNow.test(recentMessages)
+            
+            // DECISIÓN SIMPLIFICADA: ¿Quiere una imagen?
+            const wantsImage = 
+                explicitImageWords.test(text) ||                                              // Dice "imagen", "foto", "dibuja"
+                (childFriendlyRequests.test(text) && mentionsAnimalNow.test(text)) ||        // "muestra un león", "dame tigre"
+                (childFriendlyRequests.test(text) && hasRecentAnimalContext && text.length < 50) // "muestra", "aver" (si habló de animal)
+            
+            // Si es solicitud corta y directa, respuesta breve
+            const isOnlyImageRequest = wantsImage && text.split(' ').length <= 15
+            const isVeryShortRequest = childFriendlyRequests.test(text) && text.length < 30
+            
+            // Preparar el mensaje con instrucción adaptada para niños
+            let userMessage = text
+            if (isOnlyImageRequest) {
+                if (isVeryShortRequest) {
+                    // Frase MUY corta ("aver", "muestra", "uno"): usar contexto reciente
+                    userMessage = `${text}\n\n[CONTEXTO: El usuario es un niño y pide una imagen del animal que mencionamos antes. Responde con UNA frase breve y alegre confirmando. Ejemplo: "¡Claro! Aquí está tu [animal] 🦁"]`
+                } else {
+                    // Frase corta normal
+                    userMessage = `${text}\n\n[INSTRUCCIÓN: Responde en UNA frase corta y alegre confirmando la imagen. Ejemplo: "¡Genial! Te muestro un [animal] 🎨"]`
+                }
+            }
 
             // Pasar todo el historial de conversación al backend para contexto completo
             const textPromise = askExplorer(userMessage, conversationHistory)
@@ -573,13 +588,18 @@ export default function Explorer(){
                 speakText(assistantText)
             }
 
-            // Generar imagen DESPUÉS de tener la respuesta para usar el contexto completo
+            // Generar imagen DESPUÉS de tener la respuesta para usar contexto completo
             let imgRes = null
             if (wantsImage) {
                 try {
-                    // Construir contexto rico: mensaje actual + respuesta de Jaggy (que ya tiene contexto)
-                    // Jaggy ya sabe de qué animal hablaban, así que su respuesta tiene el contexto
-                    const contextForImage = `${text} ${assistantText}`
+                    // Construir contexto rico para el generador de imágenes
+                    let contextForImage = `${text} ${assistantText}`
+                    
+                    // Si la solicitud fue MUY vaga, incluir últimos mensajes para contexto completo
+                    if (isVeryShortRequest) {
+                        const recentContext = messages.slice(-6).map(m => m.text || '').filter(Boolean).join(' ')
+                        contextForImage = `${recentContext} ${text} ${assistantText}`
+                    }
                     
                     imgRes = await generateExplorerImage(contextForImage)
                 } catch (err) {
